@@ -34,7 +34,7 @@ export default function Clients({ clients, onRefresh }) {
 
   const del = async id => {
     if (!window.confirm(txt('delete') + '?')) return;
-    await axios.delete(http://localhost:5001/client/);
+    await axios.delete('http://localhost:5001/client/');
     onRefresh();
   };
 

@@ -11,7 +11,7 @@ export default function Planner({ clients, cases, onRefresh }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    await axios.post('http://localhost:5001/case', form);
+    await axios.post('/case', form);
     setForm({ ...form, items: '' });
     onRefresh();
   };
@@ -104,7 +104,7 @@ export default function Planner({ clients, cases, onRefresh }) {
                     <button
                       className="btn btn-sm btn-success"
                       onClick={async () => {
-                        await axios.post(`http://localhost:5001/dispatch/${cs.id}`);
+                        await axios.post(`/dispatch/${cs.id}`);
                         onRefresh();
                       }}
                     >

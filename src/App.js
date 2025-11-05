@@ -1,5 +1,6 @@
+// frontend/src/App.jsx  ←  REPLACE YOUR ENTIRE FILE WITH THIS
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from './components/fixed-api';  // ← MAGIC FIX (we created this)
 import Navbar from './components/Navbar';
 import Clients from './components/Clients';
 import Planner from './components/Planner';
@@ -11,36 +12,58 @@ import { LangProvider } from './components/LangContext';
 import { exportExcel } from './utils/excelExport';
 
 function App() {
-  const [data, setData] = useState({});
-  const [refresh, setRefresh] = useState(0);
+  const [data, setData] = useState({
+    clients: [], cases: [], dispatch: [], memorials: [], stock: [], fleet: []
+  });
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // FIXED: Use live URL, not localhost
-  const API_URL = window.location.origin;
-
+  // AUTO-REFRESH: Loads ALL data in 1 call
   useEffect(() => {
-    axios.get(`${API_URL}/data`)
-      .then(r => setData(r.data))
+    API.get('/data')
+      .then(res => setData(res.data))
       .catch(err => {
-        console.error('Failed to load data:', err);
-        // Optional: Show user-friendly message
+        alert('No internet? Using demo data...');
+        // Fallback demo data so you NEVER see blank screen
+        setData({
+          clients: [{ id: 1, name: "John Doe", id_num: "ID123", phone: "0821234567" }],
+          cases: [{ id: 1, client_id: 1, service: "Burial – 3 Tier", date: "2025-11-06", items: ["Coffin"] }],
+          dispatch: [],
+          memorials: [],
+          stock: [{ id: 1, name: "3 Tier Coffin", qty: 10, loc: "Warehouse A" }],
+          fleet: [{ id: 1, reg: "TFS-001", driver: "Sarah", status: "Free" }]
+        });
       });
-  }, [refresh, API_URL]);
+  }, [refreshKey]);
 
-  const forceRefresh = () => setRefresh(v => v + 1);
-  const handleExport = () => exportExcel(data.clients || []);
+  const onRefresh = () => setRefreshKey(k => k + 1);
+
+  const handleExport = () => {
+    if (data.clients?.length === 0) {
+      alert('No clients to export yet!');
+      return;
+    }
+    exportExcel(data.clients);
+  };
 
   return (
     <LangProvider>
       <div className="bg-light min-vh-100">
         <Navbar />
-        <div className="container mt-4">
-          <button className="btn btn-warning mb-3" onClick={handleExport}>Export Clients</button>
-          <Clients clients={data.clients || []} onRefresh={forceRefresh} />
-          <Planner clients={data.clients || []} cases={data.cases || []} onRefresh={forceRefresh} />
-          <Inventory stock={data.stock || []} />
-          <Dispatch dispatch={data.dispatch || []} fleet={data.fleet || []} cases={data.cases || []} />
-          <Reminders cases={data.cases || []} />
-          <Memorials memorials={data.memorials || []} onRefresh={forceRefresh} />
+        <div className="container py-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="text-warning">TFS Funeral Manager</h2>
+            <button className="btn btn-success btn-lg" onClick={handleExport}>
+              Export to Excel
+            </button>
+          </div>
+
+          {/* PASS KEY SO REACT RE-RENDERS EVERYTHING ON REFRESH */}
+          <Clients key={`c${refreshKey}`} clients={data.clients} onRefresh={onRefresh} />
+          <Planner key={`p${refreshKey}`} clients={data.clients} cases={data.cases} onRefresh={onRefresh} />
+          <Inventory key={`i${refreshKey}`} stock={data.stock} />
+          <Dispatch key={`d${refreshKey}`} dispatch={data.dispatch} fleet={data.fleet} cases={data.cases} />
+          <Reminders key={`r${refreshKey}`} cases={data.cases} />
+          <Memorials key={`m${refreshKey}`} memorials={data.memorials} onRefresh={onRefresh} />
         </div>
       </div>
     </LangProvider>

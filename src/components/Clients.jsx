@@ -41,7 +41,7 @@ export default function Clients({ clients, onRefresh }) {
   const del = async id => {
     if (!window.confirm(txt('delete') + '?')) return;
     try {
-      await axios.delete(`${window.location.origin}/client/${id}`);
+      await axios.delete(`${base}/client/${id}`);
       onRefresh();
     } catch (err) {
       alert('Delete failed');
@@ -54,28 +54,26 @@ export default function Clients({ clients, onRefresh }) {
       <div className="card-body">
         <form onSubmit={handleSubmit} className="row g-3">
           <div className="col-md-3">
-            <input className="form-control" placeholder={txt('client_name')} value={form.name} onChange={e=>setForm({...form,name:e.target.value})} required/>
+            <input className="form-control" placeholder={txt('client_name')} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
           </div>
           <div className="col-md-3">
-            <input className="form-control" placeholder={txt('id_num')} value={form.id_num} onChange={e=>setForm({...form,id_num:e.target.value})} required/>
+            <input className="form-control" placeholder={txt('id_num')} value={form.id_num} onChange={e => setForm({ ...form, id_num: e.target.value })} required />
           </div>
           <div className="col-md-2">
-            <input className="form-control" placeholder={txt('phone')} value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} required/>
+            <input className="form-control" placeholder={txt('phone')} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
           </div>
           <div className="col-md-2">
-            <input type="file" className="form-control" accept=".pdf,.jpg,.png" onChange={e=>setFile(e.target.files[0])}/>
+            <input type="file" className="form-control" accept=".pdf,.jpg,.png" onChange={e => setFile(e.target.files[0])} />
           </div>
           <div className="col-md-2">
-            <input className="form-control" placeholder="Notes" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} />
+            <input className="form-control" placeholder="Notes" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
           </div>
           <div className="col-12">
             <button className="btn btn-warning me-2">{editing ? txt('save') : txt('upload')}</button>
-            {editing && (
-              <button type="button" className="btn btn-secondary" onClick={()=>{
-                setEditing(null);
-                setForm({name:'',id_num:'',phone:'',notes:''});
-              }}>Cancel</button>
-            )}
+            {editing && <button type="button" className="btn btn-secondary" onClick={() => {
+              setEditing(null);
+              setForm({ name: '', id_num: '', phone: '', notes: '' });
+            }}>Cancel</button>}
           </div>
         </form>
 
@@ -101,9 +99,7 @@ export default function Clients({ clients, onRefresh }) {
                   <button className="btn btn-sm btn-danger" onClick={() => del(c.id)}>{txt('delete')}</button>
                 </td>
               </tr>
-            )) : (
-              <tr><td colSpan={5} className="text-muted">{txt('no_clients')}</td></tr>
-            )}
+            )) : <tr><td colSpan={5} className="text-muted">{txt('no_clients')}</td></tr>}
           </tbody>
         </table>
       </div>

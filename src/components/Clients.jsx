@@ -73,17 +73,6 @@ export default function Clients({ clients, onRefresh }) {
             )) : <tr><td colSpan={5} className="text-muted">{txt('no_clients')}</td></tr>}
           </tbody>
         </table
-          
-<tr key={c.id}>
-  <td>{c.name}</td>
-  <td>{c.id_num}</td>
-  <td>{c.phone}</td>
-  <td>{c.notes || '-'}</td>
-  <td>
-    <button onClick={() => startEdit(c)}>Edit</button>
-    <button onClick={() => del(c.id)}>Delete</button>
-  </td>
-</tr>
       </div>
     </div>
   );

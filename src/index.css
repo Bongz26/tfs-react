@@ -26,3 +26,26 @@
   background: #D4AF37 !important;
   color: #000 !important;
 }
+
+.bg-glass { 
+  background: rgba(255,255,255,0.15) !important; 
+  backdrop-filter: blur(12px); 
+}
+.dot { 
+  height: 24px; width: 24px; border-radius: 50%; 
+  box-shadow: 0 0 20px currentColor; 
+}
+.dot.busy  { background: #ff006e; animation: pulse 1.5s infinite; }
+.dot.ready { background: #39ff14; animation: pulse-green 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+@keyframes pulse-green { 0% { box-shadow:0 0 0 0 #39ff14; } 70% { box-shadow:0 0 0 15px transparent; } }
+.btn-outline-gold { 
+  border: 3px solid #D4AF37 !important; 
+  color: #D4AF37 !important; 
+  transition: all 0.3s; 
+}
+.btn-outline-gold:hover { 
+  background: #D4AF37 !important; 
+  color: #000 !important; 
+  transform: scale(1.05); 
+           }

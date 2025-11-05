@@ -17,7 +17,7 @@ export default function Clients({ clients, onRefresh }) {
     if (file) data.append('id_doc', file);
 
     if (editing) {
-      await axios.put(http://localhost:5001/client/, form);
+      await axios.put('http://localhost:5001/client/', form);
     } else {
       await axios.post('http://localhost:5001/client', data);
     }

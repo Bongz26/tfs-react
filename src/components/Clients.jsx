@@ -27,8 +27,10 @@ export default function Clients({ clients, onRefresh }) {
       setForm({ name: '', id_num: '', phone: '', notes: '' });
       setFile(null);
       setEditing(null);
+      // FIXED: Force full refresh by calling onRefresh
       onRefresh();
     } catch (err) {
+      console.error('Submit error:', err);
       alert('Upload failed: ' + (err.response?.data || err.message));
     }
   };
@@ -40,10 +42,12 @@ export default function Clients({ clients, onRefresh }) {
 
   const del = async id => {
     if (!window.confirm(txt('delete') + '?')) return;
+    const base = window.location.origin;
     try {
       await axios.delete(`${base}/client/${id}`);
-      onRefresh();
+      onRefresh(); // FIXED: Refresh after delete
     } catch (err) {
+      console.error('Delete error:', err);
       alert('Delete failed');
     }
   };
@@ -70,10 +74,12 @@ export default function Clients({ clients, onRefresh }) {
           </div>
           <div className="col-12">
             <button className="btn btn-warning me-2">{editing ? txt('save') : txt('upload')}</button>
-            {editing && <button type="button" className="btn btn-secondary" onClick={() => {
-              setEditing(null);
-              setForm({ name: '', id_num: '', phone: '', notes: '' });
-            }}>Cancel</button>}
+            {editing && (
+              <button type="button" className="btn btn-secondary" onClick={() => {
+                setEditing(null);
+                setForm({ name: '', id_num: '', phone: '', notes: '' });
+              }}>Cancel</button>
+            )}
           </div>
         </form>
 
@@ -99,7 +105,9 @@ export default function Clients({ clients, onRefresh }) {
                   <button className="btn btn-sm btn-danger" onClick={() => del(c.id)}>{txt('delete')}</button>
                 </td>
               </tr>
-            )) : <tr><td colSpan={5} className="text-muted">{txt('no_clients')}</td></tr>}
+            )) : (
+              <tr><td colSpan={5} className="text-muted">{txt('no_clients')}</td></tr>
+            )}
           </tbody>
         </table>
       </div>

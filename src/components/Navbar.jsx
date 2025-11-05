@@ -1,11 +1,17 @@
-﻿import { useLang } from './LangContext';
+import { Link } from 'react-router-dom';
+import { useLang } from './LangContext';
+
 export default function Navbar() {
-  const { txt, toggle } = useLang();
+  const { txt } = useLang();
   return (
-    <nav className="navbar bg-primary text-white">
-      <div className="container-fluid">
-        <a className="navbar-brand text-warning" href="/">Thusanang FS</a>
-        <button className="btn btn-warning btn-sm" onClick={toggle}>{txt('lang_btn')}</button>
+    <nav className="navbar bg-primary shadow">
+      <div className="container">
+        <Link to="/" className="navbar-brand text-white fw-bold">
+          <span className="text-gold">T</span>FS Manager
+        </Link>
+        <span className="text-white small">
+          Respectful • Professional • Dignified
+        </span>
       </div>
     </nav>
   );

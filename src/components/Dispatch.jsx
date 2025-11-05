@@ -1,7 +1,7 @@
-﻿import { useLang } from './LangContext';
+import { useLang } from './LangContext';
 import { Link } from 'react-router-dom';
 
-export default function Dispatch({ dispatch, fleet, cases, onRefresh }) {
+export default function Dispatch({ dispatch, fleet, cases }) {
   const { txt } = useLang();
   const caseMap = cases.reduce((m,c)=>(m[c.id]=c,m), {});
   const vehMap = fleet.reduce((m,v)=>(m[v.reg]=v,m), {});
@@ -14,7 +14,10 @@ export default function Dispatch({ dispatch, fleet, cases, onRefresh }) {
           const v = vehMap[d.vehicle];
           return (
             <div key={d.id} className="alert alert-info">
-              Case {d.case_id} → {d.vehicle} <Link to={/track/} className="btn btn-sm btn-outline-primary">{txt('track')}</Link>
+              Case {d.case_id} → {d.vehicle}
+              <Link to={`/track/${d.case_id}`} className="btn btn-sm btn-outline-primary ms-2">
+                {txt('track')}
+              </Link>
             </div>
           );
         }) : <p className="text-muted">{txt('no_dispatch')}</p>}

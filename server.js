@@ -1,3 +1,4 @@
+// backend/server.js  ←  REPLACE YOUR ENTIRE FILE WITH THIS
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
@@ -6,30 +7,32 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-app.use(cors());
+
+// ==================== RENDER FIXES ====================
+// 1. CORS: Allow your live frontend (mobile + desktop)
+app.use(cors({ origin: "*", credentials: true }));
+
+// 2. Body parser (already good)
 app.use(express.json({ limit: '10mb' }));
 
-// Create uploads folder
-const UPLOAD_DIR = path.join(__dirname, 'uploads');
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
+// 3. Render kills disk after 24h → move uploads to /tmp
+const UPLOAD_DIR = '/tmp/uploads';
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// Multer for file uploads
+// 4. Multer → save to /tmp
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => cb(null, `${uuidv4()}_${file.originalname}`)
+  filename: (req, file, cb) => cb(null, `${uuidv4()}_${Date.now()}_${file.originalname}`)
 });
 const upload = multer({ storage });
 
-// Data file
-const DB_FILE = path.join(__dirname, 'tfs_data.json');
+// 5. JSON DB → also /tmp (Render wipes everything else)
+const DB_FILE = '/tmp/tfs_data.json';
 
-// Auto-create initial data if missing
+// Auto-create DB if missing
 if (!fs.existsSync(DB_FILE)) {
   const initialData = {
-    clients: [],
-    cases: [],
-    dispatch: [],
-    memorials: [],
+    clients: [], cases: [], dispatch: [], memorials: [],
     nextIds: { client: 1, case: 1, dispatch: 1, memorial: 1 },
     stock: [
       { id: 1, name: "3 Tier Coffin", qty: 10, loc: "Warehouse A" },
@@ -47,31 +50,35 @@ if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
 }
 
+// ==================== DB HELPERS ====================
 function load() {
   try {
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+    const data = fs.readFileSync(DB_FILE, 'utf-8');
+    return JSON.parse(data);
   } catch (err) {
+    console.error('DB load error:', err);
     return { clients: [], cases: [], dispatch: [], memorials: [], nextIds: { client: 1, case: 1, dispatch: 1, memorial: 1 }, stock: [], fleet: [] };
   }
 }
+
 function save(data) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
   } catch (err) {
-    console.error('Save error:', err);
+    console.error('DB save error:', err);
   }
 }
 
-app.get('/data', (req, res) => {
-  const db = load();
-  res.json(db);
-});
+// ==================== API ROUTES ====================
+// Get everything
+app.get('/data', (req, res) => res.json(load()));
 
+// Clients
 app.post('/client', upload.single('id_doc'), (req, res) => {
   try {
     const db = load();
     const newClient = {
-      id: (db.nextIds.client || 1),
+      id: db.nextIds.client++,
       name: req.body.name || 'Unknown',
       id_num: req.body.id_num || 'N/A',
       phone: req.body.phone || 'N/A',
@@ -79,100 +86,85 @@ app.post('/client', upload.single('id_doc'), (req, res) => {
       doc: req.file ? `/uploads/${req.file.filename}` : null
     };
     db.clients.push(newClient);
-    db.nextIds.client = newClient.id + 1;
     save(db);
     res.json(newClient);
-  } catch (err) {
-    console.error('Client error:', err);
-    res.status(500).json({ error: 'Save failed' });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/client/:id', (req, res) => {
-  try {
-    const db = load();
-    const c = db.clients.find(c => c.id === parseInt(req.params.id));
-    if (!c) return res.status(404).send();
-    c.name = req.body.name || c.name;
-    c.id_num = req.body.id_num || c.id_num;
-    c.phone = req.body.phone || c.phone;
-    c.notes = req.body.notes !== undefined ? req.body.notes : c.notes;
-    save(db);
-    res.json(c);
-  } catch (err) {
-    res.status(500).json({ error: 'Update failed' });
-  }
+  const db = load();
+  const c = db.clients.find(c => c.id === +req.params.id);
+  if (!c) return res.status(404).json({ error: 'Not found' });
+  Object.assign(c, req.body);
+  save(db);
+  res.json(c);
 });
 
 app.delete('/client/:id', (req, res) => {
-  try {
-    const db = load();
-    db.clients = db.clients.filter(c => c.id !== parseInt(req.params.id));
-    save(db);
-    res.sendStatus(200);
-  } catch (err) {
-    res.status(500).json({ error: 'Delete failed' });
-  }
+  const db = load();
+  db.clients = db.clients.filter(c => c.id !== +req.params.id);
+  save(db);
+  res.sendStatus(200);
 });
 
+// Cases
 app.post('/case', (req, res) => {
   try {
     const db = load();
     const items = (req.body.items || '').split(',').map(i => i.trim()).filter(Boolean);
     const newCase = {
-      id: (db.nextIds.case || 1),
-      client_id: parseInt(req.body.client_id),
+      id: db.nextIds.case++,
+      client_id: +req.body.client_id,
       service: req.body.service,
       date: req.body.date,
       items
     };
     db.cases.push(newCase);
-    db.nextIds.case = newCase.id + 1;
     save(db);
     res.json(newCase);
-  } catch (err) {
-    res.status(500).json({ error: 'Case failed' });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Dispatch
 app.post('/dispatch/:caseId', (req, res) => {
-  try {
-    const db = load();
-    const free = db.fleet.find(v => v.status === 'Free');
-    if (!free) return res.status(400).json({ error: 'No free vehicle' });
-    free.status = 'Busy';
-    const disp = { id: (db.nextIds.dispatch || 1), case_id: parseInt(req.params.caseId), vehicle: free.reg };
-    db.dispatch.push(disp);
-    db.nextIds.dispatch = disp.id + 1;
-    save(db);
-    res.json(disp);
-  } catch (err) {
-    res.status(500).json({ error: 'Dispatch failed' });
-  }
+  const db = load();
+  const free = db.fleet.find(v => v.status === 'Free');
+  if (!free) return res.status(400).json({ error: 'No free vehicle' });
+  free.status = 'Busy';
+  const disp = { id: db.nextIds.dispatch++, case_id: +req.params.caseId, vehicle: free.reg };
+  db.dispatch.push(disp);
+  save(db);
+  res.json(disp);
 });
 
+// Memorials
 app.post('/memorial', (req, res) => {
-  try {
-    const db = load();
-    const m = { id: (db.nextIds.memorial || 1), name: req.body.name, dod: req.body.dod, message: req.body.message };
-    db.memorials.push(m);
-    db.nextIds.memorial = m.id + 1;
-    save(db);
-    res.json(m);
-  } catch (err) {
-    res.status(500).json({ error: 'Memorial failed' });
-  }
+  const db = load();
+  const m = {
+    id: db.nextIds.memorial++,
+    name: req.body.name,
+    dod: req.body.dod,
+    message: req.body.message
+  };
+  db.memorials.push(m);
+  save(db);
+  res.json(m);
 });
 
-// Serve uploads and React build
+// ==================== STATIC FILES ====================
+// Serve uploaded files from /tmp
 app.use('/uploads', express.static(UPLOAD_DIR));
+
+// Serve React build (Render puts it in /app/build)
 app.use(express.static(path.join(__dirname, 'build')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Production port
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// ==================== START SERVER ====================
+const PORT = process.env.PORT || 10000;  // Render requires this
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 TFS-React LIVE at https://tfs-react.onrender.com`);
+  console.log(`📂 Uploads → ${UPLOAD_DIR}`);
+  console.log(`💾 DB      → ${DB_FILE}`);
 });

@@ -16,9 +16,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "react-scripts": "5.0.1",
-  "eslint": "^8.0.0",
-  "eslint-plugin-react": "^7.30.0"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
   "start": "react-scripts start",

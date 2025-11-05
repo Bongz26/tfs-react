@@ -20,6 +20,12 @@ function App() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+  if (window.location.search.includes('crash')) {
+    throw new Error('Demo crash');
+  }
+}, []);
+
+  useEffect(() => {
     API.get('/data')
       .then(res => setData(res.data || {}))
       .catch(() => {

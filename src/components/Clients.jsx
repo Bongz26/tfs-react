@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useLang } from './LangContext';
 
@@ -16,15 +16,20 @@ export default function Clients({ clients, onRefresh }) {
     data.append('phone', form.phone);
     if (file) data.append('id_doc', file);
 
-    if (editing) {
-      await axios.put('http://localhost:5001/client/', form);
-    } else {
-      await axios.post('http://localhost:5001/client', data);
+    const base = window.location.origin;
+    try {
+      if (editing) {
+        await axios.put(`${base}/client/${editing.id}`, form);
+      } else {
+        await axios.post(`${base}/client`, data);
+      }
+      setForm({ name: '', id_num: '', phone: '' });
+      setFile(null);
+      setEditing(null);
+      onRefresh();
+    } catch (err) {
+      alert('Upload failed: ' + (err.response?.data || err.message));
     }
-    setForm({ name: '', id_num: '', phone: '' });
-    setFile(null);
-    setEditing(null);
-    onRefresh();
   };
 
   const startEdit = c => {
@@ -34,8 +39,12 @@ export default function Clients({ clients, onRefresh }) {
 
   const del = async id => {
     if (!window.confirm(txt('delete') + '?')) return;
-    await axios.delete('http://localhost:5001/client/');
-    onRefresh();
+    try {
+      await axios.delete(`${window.location.origin}/client/${id}`);
+      onRefresh();
+    } catch (err) {
+      alert('Delete failed');
+    }
   };
 
   return (
@@ -70,4 +79,4 @@ export default function Clients({ clients, onRefresh }) {
       </div>
     </div>
   );
-}
+      }

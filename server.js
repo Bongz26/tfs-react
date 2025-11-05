@@ -7,17 +7,20 @@ const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // For file uploads
 
+// Create uploads folder
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
 
+// Multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
   filename: (req, file, cb) => cb(null, `${uuidv4()}_${file.originalname}`)
 });
 const upload = multer({ storage });
 
+// Data persistence
 const DB_FILE = path.join(__dirname, 'tfs_data.json');
 function load() {
   if (!fs.existsSync(DB_FILE)) return { clients: [], cases: [], dispatch: [], memorials: [], nextIds: {}, stock: [], fleet: [] };
@@ -27,9 +30,11 @@ function save(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
+// Initial data
 const initialStock = require('./stock.json');
 const initialFleet = require('./fleet.json');
 
+// API Routes
 app.get('/data', (req, res) => {
   const db = load();
   db.stock = db.stock.length ? db.stock : initialStock;
@@ -105,13 +110,15 @@ app.post('/memorial', (req, res) => {
   res.json(m);
 });
 
-// Serve React build
+// Serve React build files
 app.use(express.static(path.join(__dirname, 'build')));
+
+// Catch-all for React Router
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Render uses PORT env var
+// Render requires process.env.PORT
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);

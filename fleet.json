@@ -1,0 +1,4 @@
+﻿[
+  {"id":1,"reg":"TFS-001","driver":"John","status":"Free","gps":"-28.123,28.456"},
+  {"id":2,"reg":"TFS-002","driver":"Sarah","status":"Free","gps":"-28.124,28.457"}
+]

@@ -1,0 +1,8 @@
+﻿[
+  {"id":1,"name":"3 Tier Coffin","cat":"Coffins","qty":10,"cost":1500,"loc":"Warehouse A"},
+  {"id":2,"name":"Econo Casket","cat":"Coffins","qty":5,"cost":800,"loc":"Warehouse A"},
+  {"id":3,"name":"Porcelain Urn","cat":"Urns","qty":20,"cost":450,"loc":"Warehouse B"},
+  {"id":4,"name":"Tent & 50 Chairs","cat":"Tents","qty":8,"cost":2000,"loc":"Depot"},
+  {"id":5,"name":"Grocery Pack","cat":"Catering","qty":30,"cost":500,"loc":"Kitchen"},
+  {"id":6,"name":"Flower Wreath","cat":"Flowers","qty":15,"cost":300,"loc":"Cold Room"}
+]

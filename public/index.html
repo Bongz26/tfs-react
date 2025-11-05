@@ -1,53 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TFS Funeral Manager</title>
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" href="/favicon.ico" />
-
-    <!-- AUTO-HEAL: Clear cache + reload if JS crashes -->
-    <script>
-      window.addEventListener('error', () => {
-        console.log('JS BROKE – AUTO HEALING...');
-        caches.keys().then(names => {
-          names.forEach(name => caches.delete(name));
-        });
-        setTimeout(() => location.reload(true), 8000); // 8 sec
-      });
-
-      window.addEventListener('unhandledrejection', () => {
-        alert('App crashed – Healing in 10 sec...');
-        setTimeout(() => location.reload(true), 10000);
-      });
-
-      // PWA: Install button
-      let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installBtn')?.style.display = 'block';
-      });
-    </script>
-  </head>
-  <body>
-    <noscript>You need JavaScript enabled</noscript>
-    <div id="root"></div>
-
-    <!-- INSTALL BUTTON -->
-    <button id="installBtn" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9999"
-            class="btn btn-success btn-lg rounded-circle shadow">
-      INSTALL APP
-    </button>
-
-    <script>
-      document.getElementById('installBtn')?.addEventListener('click', () => {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          document.getElementById('installBtn').style.display = 'none';
-        });
-      });
-    </script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TFS Funeral Manager</title>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script>
+    // AUTO-HEAL: Fix 502 + crashes in 10 sec
+    window.onerror = () => {
+      alert('Fixing in 10 sec...');
+      setTimeout(() => location.reload(), 10000);
+    };
+  </script>
+</body>
 </html>

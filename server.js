@@ -111,5 +111,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
+// Render uses PORT env var
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Backend on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+});

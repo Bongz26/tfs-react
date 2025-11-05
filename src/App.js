@@ -58,12 +58,12 @@ function App() {
         <div className="container py-4">
 
           {/* SECRET ADMIN BUTTON – CLICK TO REVEAL FLEET CONTROL */}
-          <div className="text-end mb-3">
-            <Link to="/admin" className="btn btn-danger btn-sm shadow">
-              ADMIN CONTROL ROOM
-            </Link>
-          </div>
-
+          
+<div className="text-end mb-3">
+  <Link to="/admin" className="btn" style={{background:'#8B1A1A', color:'white'}}>
+    ADMIN CONTROL
+  </Link>
+</div>
           <Routes>
 
             {/* === PUBLIC APP === */}
